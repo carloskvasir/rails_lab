@@ -1,0 +1,38 @@
+# Configuração do Kamal 2 para Rails Lab
+service: rails-lab
+
+image: ghcr.io/${GITHUB_USER}/rails-lab
+
+servers:
+  web:
+    hosts:
+      - ${DEPLOY_IP} # IP do servidor ou endpoint Railway configurado como destino SSH
+    labels:
+      traefik.http.routers.rails-lab.rule: Host(`${DOMAIN}`)
+      traefik.http.routers.rails-lab.tls: true
+      traefik.http.routers.rails-lab.tls.certresolver: letsencrypt
+
+registry:
+  server: ghcr.io
+  username: ${GITHUB_USER}
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: true
+    RAILS_SERVE_STATIC_FILES: true
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+
+proxy:
+  ssl: true
+  host: ${DOMAIN}
+
+# Kamal 2 utiliza Traefik por padrão para gerenciamento de tráfego e SSL
+builder:
+  arch: amd64
+  remote:
+    arch: amd64
