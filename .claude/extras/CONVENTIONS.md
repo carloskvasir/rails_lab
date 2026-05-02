@@ -93,10 +93,17 @@ Lab commits flow into public history (and eventually a production-grade pipeline
 
 ## 🌿 Branches
 
-- `main` — protected, deployable. No direct commits *unless the repo is in the bootstrap phase* (current state). Once a deploy pipeline exists, all changes go through PRs.
-- Feature branches: `feat/<short-slug>` (e.g. `feat/account-tenancy`).
-- Fix branches: `fix/<short-slug>` (e.g. `fix/puma-bind-address`).
-- Chore/infra: `chore/<short-slug>` or `infra/<short-slug>`.
+Branches **must** follow the following naming pattern:
+`<type>/<identifier>/<slug>`
+
+- **type** — `feat`, `chore`, `fix`, or `security`.
+- **identifier** — task ID in the format `rl-xxx` (e.g., `rl-123`, `rl-001`).
+- **slug** — short, descriptive lowercase text (e.g., `create-anything`).
+
+**Examples:**
+- `feat/rl-001/create-anything`
+- `fix/rl-111/login-error`
+- `chore/rl-999/update-dependencies`
 
 ---
 

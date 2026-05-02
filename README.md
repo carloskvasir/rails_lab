@@ -1,6 +1,6 @@
 # rails_lab
 
-> Laboratório de experimentação profunda sobre **Ruby on Rails internals**, com foco no ciclo de vida da requisição, middlewares, callbacks e na transição arquitetural **Rails 7.2 → 8.0**.
+> Deep experimentation lab focused on **Ruby on Rails internals** — request lifecycle, middlewares, callbacks, and the architectural transition from **Rails 7.2 to 8.0**.
 
 [![Ruby](https://img.shields.io/badge/Ruby-3.3%2B-CC342D?logo=ruby)](https://www.ruby-lang.org/)
 [![Rails](https://img.shields.io/badge/Rails-7.2.3.1-CC0000?logo=rubyonrails)](https://rubyonrails.org/)
@@ -9,74 +9,80 @@
 
 ---
 
-## 🎯 Objetivo
+## 🎯 Goal
 
-`rails_lab` é um ambiente controlado, criado por **Carlos Kvasir Lima**, para testar os limites do Ruby on Rails e validar arquiteturas de deploy modernas. O laboratório serve para:
+`rails_lab` is a controlled environment, built by **Carlos Kvasir Lima**, for stress-testing the limits of Ruby on Rails and validating modern deploy architectures. The lab is used to:
 
-- Explorar o ciclo de vida de uma requisição Rails (Rack → middlewares → controller → callbacks).
-- Documentar o caminho de upgrade **Rails 7.2 → Rails 8.0**.
-- Validar um workflow de deploy *infra-as-code* com **Kamal 2** apontando para o **Railway**.
-- Servir como referência prática de *clean code* e da filosofia "The Rails Way".
-
----
-
-## 🧱 Stack Técnica
-
-| Camada | Tecnologia |
-|---|---|
-| Linguagem | Ruby 3.3+ |
-| Framework | Ruby on Rails **7.2.3.1** (alvo: 8.0) |
-| Base de Dados | PostgreSQL (provisionado pelo Railway) |
-| Containerização | Docker (multi-stage) |
-| Deploy | Kamal 2 |
-| Registry | GitHub Container Registry (`ghcr.io`) |
-| Target | Railway |
+- Explore the lifecycle of a Rails request (Rack → middlewares → controller → callbacks).
+- Document the upgrade path from **Rails 7.2 to Rails 8.0**.
+- Validate an *infrastructure-as-code* deploy workflow with **Kamal 2** targeting **Railway**.
+- Serve as a practical reference for *clean code* and the "The Rails Way" philosophy.
 
 ---
 
-## 🏛 Decisões de Arquitetura (ADRs)
+## 🧱 Tech Stack
 
-As decisões estão documentadas em [`MEMORY.md`](./MEMORY.md). Resumo:
-
-- **ADR-001 — Versão Rails:** começar em `7.2.3.1` (base estável) e documentar a migração para `8.0`.
-- **ADR-002 — Estratégia de Deploy:** `Kamal 2 → Railway`, unindo a simplicidade do SaaS à *ownership* de infra que o Kamal entrega (zero-downtime, Docker-based).
-- **ADR-003 — Workflow de IA:** Claude como orquestrador (contexto XML), Gemini-CLI como executor tático.
+| Layer            | Technology                              |
+| ---------------- | --------------------------------------- |
+| Language         | Ruby 3.3+                               |
+| Framework        | Ruby on Rails **7.2.3.1** (target: 8.0) |
+| Database         | PostgreSQL (provisioned on Railway)     |
+| Containerization | Docker (multi-stage)                    |
+| Deployment       | Kamal 2                                 |
+| Registry         | GitHub Container Registry (`ghcr.io`)   |
+| Target           | Railway                                 |
 
 ---
 
-## 📂 Estrutura do Repositório
+## 🏛 Architectural Decisions (ADRs)
+
+ADRs are recorded in [`.claude/extras/MEMORY.md`](./.claude/extras/MEMORY.md). Summary:
+
+- **ADR-001 — Rails version:** start at `7.2.3.1` (stable baseline) and document the migration path to `8.0`.
+- **ADR-002 — Deploy strategy:** `Kamal 2 → Railway`, combining the simplicity of the PaaS with the infrastructure ownership Kamal provides (zero-downtime, Docker-based).
+- **ADR-003 — AI workflow:** Claude as orchestrator (XML context), Gemini-CLI as tactical executor.
+
+---
+
+## 📂 Repository Layout
 
 ```
 rails_lab/
+├── .claude/
+│   ├── extras/
+│   │   ├── CONVENTIONS.md     # Commit + authorship rules
+│   │   ├── DEPLOY_SECRETS.md  # Secrets injection guide (Railway + Kamal)
+│   │   ├── DOS_AND_DONTS.md   # Enforceable rule reference
+│   │   └── MEMORY.md          # Long-term memory (ADRs + activity log)
+│   └── skills/                # Project-scoped Claude skills
 ├── config/
-│   └── deploy.yml         # Configuração do Kamal 2
-├── Dockerfile             # Imagem de produção (multi-stage)
-├── DEPLOY_SECRETS.md      # Guia de injeção de secrets (Railway + Kamal)
-├── GEMINI.md              # Contexto técnico para o Gemini-CLI
-├── MEMORY.md              # Memória de longo prazo (ADRs + log)
-└── README.md              # Este ficheiro
+│   └── deploy.yml             # Kamal 2 configuration
+├── Dockerfile                 # Production image (multi-stage)
+├── GEMINI.md                  # Technical context for Gemini-CLI
+├── CLAUDE.md                  # Entry point for AI agents
+└── README.md                  # This file
 ```
 
 ---
 
 ## 🚀 Deploy
 
-O fluxo de deploy é totalmente baseado em Kamal 2.
+The deploy workflow is entirely based on Kamal 2.
 
-### Pré-requisitos
+### Prerequisites
 
-- Conta no [Railway](https://railway.com/) com um serviço PostgreSQL provisionado.
-- Personal Access Token do GitHub com permissão `write:packages` (para o `ghcr.io`).
-- `RAILS_MASTER_KEY` do projeto.
+- A [Railway](https://railway.com/) account with a provisioned PostgreSQL service.
+- A GitHub Personal Access Token with `write:packages` permission (for `ghcr.io`).
+- The project's `RAILS_MASTER_KEY`.
 
-### Passos
+### Steps
 
-1. Configura os secrets locais (`.env`) e remotos (Railway) — ver [`DEPLOY_SECRETS.md`](./DEPLOY_SECRETS.md).
-2. Valida a configuração:
+1. Configure local secrets (`.env`) and remote secrets (Railway) — see [`.claude/extras/DEPLOY_SECRETS.md`](./.claude/extras/DEPLOY_SECRETS.md).
+2. Validate the configuration:
    ```bash
    kamal config
    ```
-3. Prepara o servidor remoto:
+3. Prepare the remote server:
    ```bash
    kamal setup
    ```
@@ -87,28 +93,28 @@ O fluxo de deploy é totalmente baseado em Kamal 2.
 
 ---
 
-## 📅 Estado Atual
+## 📅 Current State
 
-- [x] Definição de stack (Rails 7.2.3.1).
-- [x] Setup do ambiente local e Gemini-CLI.
-- [x] `Dockerfile` otimizado (multi-stage).
-- [x] `config/deploy.yml` para Railway.
-- [x] Documentação de secrets (`DEPLOY_SECRETS.md`).
-- [ ] Boilerplate Rails inicial (`rails new .`).
-- [ ] Primeiro deploy bem-sucedido no Railway.
-- [ ] Migração documentada para Rails 8.0.
-
----
-
-## 🤝 Convenções
-
-- **Idioma do código:** inglês (variáveis, métodos, classes, commits).
-- **Idioma da documentação de laboratório:** português (este README, ADRs, notas).
-- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/).
-- **Compatibilidade:** evitar APIs depreciadas no Rails 7.2 que dificultem o upgrade para 8.0.
+- [x] Stack defined (Rails 7.2.3.1).
+- [x] Local environment and Gemini-CLI configured.
+- [x] Optimized `Dockerfile` (multi-stage).
+- [x] `config/deploy.yml` targeting Railway.
+- [x] Secrets documentation (`.claude/extras/DEPLOY_SECRETS.md`).
+- [x] Initial Rails boilerplate (`rails _7.2.3.1_ new .`).
+- [ ] First successful deploy to Railway.
+- [ ] Documented migration path to Rails 8.0.
 
 ---
 
-## 👤 Autor
+## 🤝 Conventions
 
-**Carlos Kvasir Lima** — laboratório pessoal de Rails internals e infra moderna.
+- **Code language:** English (variables, methods, classes, comments, commits).
+- **Documentation language:** English. Historical Portuguese notes in `.claude/extras/MEMORY.md` are preserved as-is — new entries are added in English.
+- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) — full rules and the no-AI-attribution policy in [`.claude/extras/CONVENTIONS.md`](./.claude/extras/CONVENTIONS.md).
+- **Forward compatibility:** avoid Rails 7.2 APIs already deprecated, to keep the path to 8.0 clean.
+
+---
+
+## 👤 Author
+
+**Carlos Kvasir Lima** — personal lab for Rails internals and modern infrastructure.

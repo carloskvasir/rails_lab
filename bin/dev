@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Boots the local development stack:
+#   1. Verifies the web port is free (and reports the offending PID otherwise).
+#   2. Ensures the docker-compose backing services (Postgres, Redis) are up.
+#   3. Hands over to foreman to run every process declared in Procfile.dev.
+#
+# Usage: bin/dev
+#        PORT=4000 bin/dev    # override default port
+
+set -euo pipefail
+
+PORT="${PORT:-3000}"
+
+# 1. Port pre-flight -----------------------------------------------------
+# If something is already bound to the web port, refuse to start and tell
+# the operator exactly what to kill — no silent failures, no auto-kill.
+check_port_free() {
+  local port="$1"
+  local pid=""
+
+  if command -v lsof >/dev/null 2>&1; then
+    pid="$(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null | head -n1 || true)"
+  elif command -v ss >/dev/null 2>&1; then
+    pid="$(ss -ltnpH "sport = :$port" 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -n1 || true)"
+  elif command -v fuser >/dev/null 2>&1; then
+    pid="$(fuser -n tcp "$port" 2>/dev/null | tr -d ' ' || true)"
+  fi
+
+  if [ -n "$pid" ]; then
+    echo "✖ Port ${port} is already in use." >&2
+    echo "  PID:     ${pid}" >&2
+    if command -v ps >/dev/null 2>&1; then
+      local proc
+      proc="$(ps -p "$pid" -o pid=,user=,comm=,args= 2>/dev/null || true)"
+      [ -n "$proc" ] && echo "  Process: ${proc}" >&2
+    fi
+    echo "  Free it: kill ${pid}     # or: kill -9 ${pid}" >&2
+    echo "  Or run on another port:  PORT=$((port + 1)) bin/dev" >&2
+    exit 1
+  fi
+}
+
+check_port_free "$PORT"
+
+# 2. Backing services -----------------------------------------------------
+if command -v docker >/dev/null 2>&1 && [ -f docker-compose.yml ]; then
+  if ! docker compose ps --status running --services 2>/dev/null | grep -q '^db$'; then
+    echo "==> Starting docker-compose services (db, redis)…"
+    docker compose up -d --wait
+  fi
+fi
+
+# 3. foreman -------------------------------------------------------------
+if ! gem list --silent --installed foreman >/dev/null; then
+  echo "==> Installing foreman (system-wide gem, not in the bundle)…"
+  gem install foreman
+fi
+
+exec foreman start -f Procfile.dev "$@"

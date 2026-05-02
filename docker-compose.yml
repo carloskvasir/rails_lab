@@ -1,0 +1,58 @@
+# Local development services for rails_lab.
+#
+# Scope: PostgreSQL + Redis only. The Rails app itself runs on the host
+# (via `bin/dev`), because:
+#   1. The repo Dockerfile is production-targeted (RAILS_ENV=production,
+#      BUNDLE_DEPLOYMENT=1, BUNDLE_WITHOUT=development) and is owned by
+#      Kamal per ADR-002 — running it in dev would diverge from prod.
+#   2. A lab focused on Rails internals benefits from native autoloading,
+#      `binding.pry`, and instant edit/reload, which a containerized app
+#      makes harder.
+#
+# Bring everything up:    docker compose up -d
+# Tail logs:              docker compose logs -f
+# Stop:                   docker compose down
+# Reset DB volume:        docker compose down -v   # ⚠ destroys data
+
+name: rails_lab
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rails_lab
+      POSTGRES_PASSWORD: rails_lab
+      POSTGRES_DB: rails_lab_development
+      # Lab-only convenience: trust connections from the local Docker network.
+      # Do NOT replicate this in production.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      # Bound to loopback only — never expose Postgres on 0.0.0.0 from a dev box.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rails_lab -d rails_lab_development"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -28,6 +28,7 @@
 
 <project_guidelines>
   - code_style: "Seguir as convenções do Rails 7.2, evitando anti-patterns em callbacks."
+  - branch_naming: "Seguir o padrão (feat/chore/fix/security)(rl-xxx/rl-111)(/text-nice) conforme CONVENTIONS.md."
   - future_proofing: "Escrever código compatível ou facilmente migrável para o Rails 8 (evitar APIs depreciadas)."
   - deployment: "Utilizar o Kamal para um workflow 'Railway-style' de alta simplicidade."
   - security: "Práticas de digital self-defense no gerenciamento de secrets e variáveis de ambiente."
@@ -36,10 +37,11 @@
 <current_state>
   - [X] Definição de stack (7.2.3.1).
   - [X] Setup do ambiente local e CLI (Gemini-CLI configurado).
+  - [X] Configuração do CI completa (lint, scan, test, build).
   - [ ] Criação do Dockerfile otimizado.
   - [ ] Configuração do deploy.yml do Kamal para Railway.
 </current_state>
 
 <current_task>
-  # Aguardando definição da próxima tarefa tática (Geração de infra ou boilerplate de laboratório).
+  # Aguardando definição da próxima tarefa tática.
 </current_task>
